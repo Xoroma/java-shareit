@@ -7,6 +7,7 @@ import java.util.List;
 public interface ItemService {
 
     ItemDto createItem(ItemDto itemDto, long ownerId);
+
     ItemDto getItemById(Long id);
 
     List<ItemDto> getAllItemsByOwnerId(Long ownerId);

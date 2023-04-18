@@ -24,6 +24,7 @@ public class ItemController {
         log.debug("ItemController POST /items with body {}", itemDto);
         return itemService.createItem(itemDto, ownerId);
     }
+
     @GetMapping("/{id}")
     public ItemDto getItemById(@PathVariable long id) {
         log.debug("ItemController GET /items/{}", id);
