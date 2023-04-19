@@ -84,5 +84,6 @@ public class ItemServiceImpl implements ItemService {
         item.setId(itemId);
         return mapToItemDto(itemRepository.update(itemId, item, owner));
     }
+
     
 }
