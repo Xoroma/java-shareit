@@ -29,7 +29,7 @@ class UserServiceImpl implements UserService {
         if (user.getEmail() == null) {
             throw new EmailAlreadyExistsException("Email can't be  mull");
         }
-        if (isEmailInvalid(user.getId(), user.getEmail())) {
+        if (isEmailDuplicate(user.getId(), user.getEmail())) {
             throw new EmailAlreadyExistsException("Email already used");
         }
         return mapToUserDto(userRepository.createUser(user));
@@ -55,7 +55,7 @@ class UserServiceImpl implements UserService {
         if (userFromDto.getName() == null) {
             userFromDto.setName(userFromStorage.getName());
         }
-        if (isEmailInvalid(userFromDto.getId(), userFromDto.getEmail())) {
+        if (isEmailDuplicate(userFromDto.getId(), userFromDto.getEmail())) {
             throw new EmailAlreadyExistsException("Email already used");
         }
         if (userFromDto.getEmail() == null) {
@@ -71,7 +71,7 @@ class UserServiceImpl implements UserService {
 
 
     @Override
-    public boolean isEmailInvalid(Long id, String email) {
+    public boolean isEmailDuplicate(Long id, String email) {
         Set<String> emails = userRepository.getAllEmails();
         if (emails.contains(email) && !userRepository.getUserById(id).getEmail().equals(email)) {
             throw new EmailAlreadyExistsException("Email Is already used");

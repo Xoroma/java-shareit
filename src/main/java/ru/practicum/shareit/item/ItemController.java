@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.PatchDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -39,8 +40,8 @@ public class ItemController {
 
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") long ownerId,
-                          @RequestBody @Valid ItemDto itemDto) {
+    public ItemDto updateItem(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") long ownerId,
+                          @RequestBody @Valid PatchDto itemDto) {
         log.debug("ItemController PATCH /items with body {}", itemDto);
         return itemService.updateItem(itemId, itemDto, ownerId);
     }

@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.mapper;
 
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.PatchDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
+
 
 public class ItemMapper {
     public static ItemDto mapToItemDto(Item item) {
@@ -25,4 +27,17 @@ public class ItemMapper {
         item.setOwner(owner);
         return item;
     }
+
+    public static Item mapToItemPatchCase(PatchDto itemDto, User owner) {
+        Item item = new Item();
+        item.setId(itemDto.getId());
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setRequest(itemDto.getRequest());
+        item.setOwner(owner);
+        return item;
+    }
+
+
 }

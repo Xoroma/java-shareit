@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
+import ru.practicum.shareit.exeption.NotOwnerExeption;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.PatchDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -13,13 +15,11 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserService;
 
 
-import javax.validation.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.mapper.ItemMapper.mapToItem;
-import static ru.practicum.shareit.item.mapper.ItemMapper.mapToItemDto;
+import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 import static ru.practicum.shareit.user.mapper.UserMapper.mapToUser;
 
 @Service
@@ -34,15 +34,6 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(ItemDto itemDto, long ownerId) {
         User usr = mapToUser(userService.getUserById(ownerId));
         Item item = mapToItem(itemDto, usr);
-        if (item.getAvailable() == null) {
-            throw new ValidationException("Item is Not Available");
-        }
-        if (item.getDescription() == null) {
-            throw new ValidationException("Description Is Null");
-        }
-        if (item.getName() == null || item.getName().equals("")) {
-            throw new ValidationException("Name is Invalid");
-        }
         return mapToItemDto(itemRepository.create(item, usr));
     }
 
@@ -70,17 +61,16 @@ public class ItemServiceImpl implements ItemService {
                 .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
     }
 
-
     @Override
-    public ItemDto updateItem(Long itemId, ItemDto itemDto, Long ownerId) {
+    public ItemDto updateItem(Long itemId, PatchDto itemDto, Long ownerId) {
         Item oldItem = itemRepository.getItemById(itemId);
         User owner = mapToUser(userService.getUserById(ownerId));
-        Item item = mapToItem(itemDto, owner);
+        Item item = mapToItemPatchCase(itemDto, owner);
         if (item.getOwner() == null) {
             item.setOwner(owner);
         }
         if (!oldItem.getOwner().equals(owner)) {
-            throw new NotFoundException("User is incorrect");
+            throw new NotOwnerExeption("Owner is incorrect");
         }
         if (item.getName() == null) {
             item.setName(oldItem.getName());
@@ -94,4 +84,5 @@ public class ItemServiceImpl implements ItemService {
         item.setId(itemId);
         return mapToItemDto(itemRepository.update(itemId, item, owner));
     }
+    
 }

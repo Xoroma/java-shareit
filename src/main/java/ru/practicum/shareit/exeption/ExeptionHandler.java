@@ -28,9 +28,17 @@ public class ExeptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleAlreadyExistExeption(AlreadyExistExeption e) {
+        log.error("Handled Already Exist Exception", e);
         return new ErrorResponse(
                 e.getMessage()
         );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotOwnerException(NotOwnerExeption e) {
+        log.error("Handled Not Owner Exception", e);
+        return new ErrorResponse(e.getMessage());
     }
 
 }

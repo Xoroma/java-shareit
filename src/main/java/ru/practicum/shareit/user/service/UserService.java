@@ -15,5 +15,5 @@ public interface UserService {
 
     void deleteUserById(Long id);
 
-    boolean isEmailInvalid(Long id, String email);
+    boolean isEmailDuplicate(Long id, String email);
 }
