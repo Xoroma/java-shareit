@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
         }
         if (itemRepository.findById(dto.getItemId()).get().isAvailable()
                 && dto.getEnd().isAfter(dto.getStart())) {
-            return BookingMapper.toFullBookingDtoFromBooking(
+            return BookingMapper.toFullBookingFromBooking(
                     bookingRepository.save(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)),
                     Status.WAITING, itemRepository, userRepository);
         } else {
@@ -57,7 +57,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException();
         }
         Status status = booking.getStatus();
-        return BookingMapper.toFullBookingDtoFromBooking(booking, status, itemRepository, userRepository);
+        return BookingMapper.toFullBookingFromBooking(booking, status, itemRepository, userRepository);
     }
 
 
@@ -83,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
             }
             booking = BookingMapper.mapToBooking(dto, bookerId, status);
 
-            return BookingMapper.toFullBookingDtoFromBooking(bookingRepository.save(booking), status,
+            return BookingMapper.toFullBookingFromBooking(bookingRepository.save(booking), status,
                     itemRepository, userRepository);
         } else {
             throw new NotFoundException();
@@ -100,21 +100,21 @@ public class BookingServiceImpl implements BookingService {
             case ALL:
                 return bookingRepository.findAllByBookerId(bookerId, Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case PAST:
                 return bookingRepository.findByBookerIdAndEndAfter(bookerId, LocalDateTime.now(),
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case FUTURE:
                 return bookingRepository.findByBookerIdAndStartAfter(bookerId, LocalDateTime.now(),
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case CURRENT:
@@ -122,21 +122,21 @@ public class BookingServiceImpl implements BookingService {
                                 LocalDateTime.now(),
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case WAITING:
                 return bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.WAITING,
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case REJECTED:
                 return bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.REJECTED,
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             default:
@@ -154,41 +154,41 @@ public class BookingServiceImpl implements BookingService {
             case ALL:
                 return bookingRepository.bookingsForItem(ownerId, Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case PAST:
                 return bookingRepository.bookingsForItemPast(ownerId, LocalDateTime.now(),
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case FUTURE:
                 return bookingRepository.bookingsForItemFuture(ownerId, LocalDateTime.now(),
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case CURRENT:
                 return bookingRepository.bookingsForItemCurrent(ownerId, LocalDateTime.now(),
                                 Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case WAITING:
                 return bookingRepository.bookingsForItem(ownerId, Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .filter(l -> l.getStatus() == Status.WAITING)
                         .collect(Collectors.toList());
             case REJECTED:
                 return bookingRepository.bookingsForItem(ownerId, Sort.by(Sort.Direction.DESC, "start"))
                         .stream()
-                        .map(l -> BookingMapper.toFullBookingDtoFromBooking(l, l.getStatus(),
+                        .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .filter(l -> l.getStatus() == Status.REJECTED)
                         .collect(Collectors.toList());

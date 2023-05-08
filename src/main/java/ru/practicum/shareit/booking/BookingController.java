@@ -41,6 +41,13 @@ public class BookingController {
         return bookingService.addBooking(dto, bookerId);
     }
 
+    @PatchMapping("/{bookingId}")
+    public FullBookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved, @RequestHeader(userHeader) long bookerId)
+            throws NotFoundException, BadRequestException {
+
+        log.info("Request from PATCH /bookings/ " + bookingId + "?approved= " + approved);
+        return bookingService.approveBooking(bookingId, approved, bookerId);
+    }
 
     @GetMapping("/{bookingId}")
     public FullBookingDto getBooking(@PathVariable long bookingId, @RequestHeader(userHeader) long bookerId)
@@ -66,12 +73,5 @@ public class BookingController {
         return bookingService.getAllBookingByItemsByOwnerId(ownerId, state);
     }
 
-    @PatchMapping("/{bookingId}")
-    public FullBookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved, @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException, BadRequestException {
-
-        log.info("Request from PATCH /bookings/ " + bookingId + "?approved= " + approved);
-        return bookingService.approveBooking(bookingId, approved, bookerId);
-    }
 }
 

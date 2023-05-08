@@ -32,9 +32,9 @@ public class BookingMapper {
     }
 
 
-    public static FullBookingDto toFullBookingDtoFromBooking(Booking booking, Status status,
-                                                             ItemRepository itemRepository,
-                                                             UserRepository userRepository) {
+    public static FullBookingDto toFullBookingFromBooking(Booking booking, Status status,
+                                                          ItemRepository itemRepository,
+                                                          UserRepository userRepository) {
 
         User booker = userRepository.findById(booking.getBookerId()).get();
 

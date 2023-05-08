@@ -11,10 +11,6 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByBookerIdAndEndAfter(Long bookerId, LocalDateTime end, Sort sort);
-
-    List<Booking> findAllByBookerId(Long bookerId, Sort sort);
-
     @Query(" select b" +
             " from Booking b " +
             " join User u on (u.id = b.bookerId)" +
@@ -30,7 +26,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             " join User u on (u.id = b.bookerId)" +
             " where u.id = ?1 and b.end < ?2"
     )
+    List<Booking> findByBookerIdAndEndAfter(Long bookerId, LocalDateTime end, Sort sort);
 
+    List<Booking> findAllByBookerId(Long bookerId, Sort sort);
 
     List<Booking> findAllByBookerIdAndStatus(Long bookerId, Status status, Sort sort);
 
