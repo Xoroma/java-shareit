@@ -1,21 +1,37 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.*;
-import ru.practicum.shareit.user.User;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+import javax.persistence.*;
 
 /**
  * TODO Sprint add-controllers.
  */
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode
+@Data
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "items")
 public class Item {
-   private Long id;
-   private String name;
-   private String description;
-   private Boolean available;
-   private User owner;
-   private Long request; /*если вещь была создана по запросу другого пользователя, то в этом поле будет хранится
-                           ссылка на соответвующий запрос.*/
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    long id;
+
+    String name;
+
+    String description;
+
+    boolean available;
+
+    @Column(name = "owner_id")
+    long ownerId;
+
+    @Column(name = "request_id")
+    long requestId;
 }
