@@ -30,7 +30,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public FullBookingDto addBooking(BookingDto dto, long bookerId) {
-        if(dto.getStart() == null ||dto.getEnd() ==null){
+        if (dto.getStart() == null || dto.getEnd() == null) {
             throw new NullPointerException();
         }
 
@@ -202,17 +202,19 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> allBookingsForItem(Long itemId){
+    public List<Booking> allBookingsForItem(Long itemId) {
+
         return bookingRepository.allBookingsForItem(itemId);
     }
 
     @Override
-    public List<Booking> findAllByItemsOwnerId(Long ownerId){
+    public List<Booking> findAllByItemsOwnerId(Long ownerId) {
         return bookingRepository.findAllByItemsOwnerId(ownerId);
     }
 
     @Override
-    public List<Booking> bookingsForItemAndBookerPast(Long bookerId, Long itemId, LocalDateTime now){
+    public List<Booking> bookingsForItemAndBookerPast(Long bookerId, Long itemId, LocalDateTime now) {
         return bookingRepository.bookingsForItemAndBookerPast(bookerId,itemId,now);
     }
+
 }

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingService {
-    FullBookingDto addBooking(BookingDto dto, long bookerId) ;
+    FullBookingDto addBooking(BookingDto dto, long bookerId);
 
     FullBookingDto approveBooking(long bookingId, boolean approved, long bookerId);
 
@@ -20,6 +20,9 @@ public interface BookingService {
     List<FullBookingDto> getAllBookingByItemsByOwnerId(long ownerId, BookingState state);
 
     List<Booking> allBookingsForItem(Long itemId);
+
     List<Booking> findAllByItemsOwnerId(Long ownerId);
+
     List<Booking> bookingsForItemAndBookerPast(Long bookerId, Long itemId, LocalDateTime now);
+
 }

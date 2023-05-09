@@ -15,8 +15,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.FullBookingDto;
 import ru.practicum.shareit.booking.model.enums.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -42,7 +40,7 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public FullBookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved,
-                                         @RequestHeader(userHeader) long bookerId){
+                                         @RequestHeader(userHeader) long bookerId) {
 
         log.info("Request from PATCH /bookings/ " + bookingId + "?approved= " + approved);
         return bookingService.approveBooking(bookingId, approved, bookerId);
