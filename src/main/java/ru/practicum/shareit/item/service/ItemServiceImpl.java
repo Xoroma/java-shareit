@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDtoWithCommments;
@@ -15,7 +15,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 
 import java.time.LocalDateTime;
@@ -33,14 +33,14 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final BookingRepository bookingRepository;
+    private final UserService userService;
+    private final BookingService bookingService;
     private final CommentRepository commentRepository;
 
     @Override
-    public ItemDto addItem(ItemDto dto, long ownerId) throws NotFoundException {
+    public ItemDto addItem(ItemDto dto, long ownerId)  {
         log.info("Добавлен предмет");
-        if (userRepository.existsById(ownerId)) {
+        if (userService.existsById(ownerId)) {
             return mapToItemDto(itemRepository.save(mapToItem(dto, ownerId)));
         } else {
             throw new NotFoundException();
@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoWithCommments getItem(long itemId, long ownerId) throws NotFoundException {
+    public ItemDtoWithCommments getItem(long itemId, long ownerId)  {
 
         if (itemRepository.existsById(itemId)) {
             Item item = itemRepository.getReferenceById(itemId);
@@ -64,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
             List<Booking> bookings;
 
             if (item.getOwnerId() == ownerId) {
-                bookings = new ArrayList<>(bookingRepository.allBookingsForItem(itemId));
+                bookings = new ArrayList<>(bookingService.allBookingsForItem(itemId));
             } else {
                 bookings = Collections.emptyList();
             }
@@ -82,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem(ItemDto dto, long ownerId, long itemId) throws NotFoundException {
+    public ItemDto updateItem(ItemDto dto, long ownerId, long itemId) {
         dto.setId(itemId);
         if (getItemOwnerId(itemId) != ownerId) {
             throw new NotFoundException();
@@ -116,7 +116,7 @@ public class ItemServiceImpl implements ItemService {
                         .collect(Collectors.toList());
 
         List<Comment> allCommentsByItemsOwner = commentRepository.findAllByItemsOwnerId(ownerId);
-        List<Booking> allBookingsByItemsOwner = bookingRepository.findAllByItemsOwnerId(ownerId);
+        List<Booking> allBookingsByItemsOwner = bookingService.findAllByItemsOwnerId(ownerId);
 
         for (ItemDtoWithCommments item : allItems) {
 
@@ -153,9 +153,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Comment addComment(Comment dto, long itemId, long authorId) throws BadRequestException {
-        if (bookingRepository.bookingsForItemAndBookerPast(authorId, itemId, LocalDateTime.now()).size() != 0) {
-            User author = userRepository.findById(authorId).get();
+    public Comment addComment(Comment dto, long itemId, long authorId) {
+        if (bookingService.bookingsForItemAndBookerPast(authorId, itemId, LocalDateTime.now()).size() != 0) {
+            User author = userService.getUserById(authorId);
             Comment comment = new Comment();
             comment.setAuthorId(authorId);
             comment.setItemId(itemId);

@@ -34,24 +34,22 @@ public class BookingController {
     private final String userHeader = "X-Sharer-User-Id";
 
     @PostMapping
-    public FullBookingDto createBooking(@Valid @RequestBody BookingDto dto, @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException, BadRequestException {
+    public FullBookingDto createBooking(@Valid @RequestBody BookingDto dto, @RequestHeader(userHeader) long bookerId) {
 
         log.info("Request from POST /bookings");
         return bookingService.addBooking(dto, bookerId);
     }
 
     @PatchMapping("/{bookingId}")
-    public FullBookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved, @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException, BadRequestException {
+    public FullBookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved,
+                                         @RequestHeader(userHeader) long bookerId){
 
         log.info("Request from PATCH /bookings/ " + bookingId + "?approved= " + approved);
         return bookingService.approveBooking(bookingId, approved, bookerId);
     }
 
     @GetMapping("/{bookingId}")
-    public FullBookingDto getBooking(@PathVariable long bookingId, @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException {
+    public FullBookingDto getBooking(@PathVariable long bookingId, @RequestHeader(userHeader) long bookerId) {
 
         log.info("Request GET /bookings/ " + bookingId);
         return bookingService.getBooking(bookingId, bookerId);

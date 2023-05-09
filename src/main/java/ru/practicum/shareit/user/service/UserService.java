@@ -18,13 +18,13 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User add(User user) throws BadRequestException {
+    public User add(User user) {
         log.info("Добавлен новый пользователь");
 
         return userRepository.save(user);
     }
 
-    public User getUserById(long id) throws NotFoundException {
+    public User getUserById(long id) {
 
         if (userRepository.findById(id).isPresent()) {
             log.info("Получен пользователь с id " + id);
@@ -38,7 +38,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User update(User user, long id) throws NotFoundException {
+    public User update(User user, long id) {
         user.setId(id);
         if (user.getName() == null) {
             if (userRepository.findById(id).isPresent()) {
@@ -61,5 +61,9 @@ public class UserService {
     public void delete(long id) {
         log.info("Удалён пользователь с id " + id);
         userRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id){
+        return userRepository.existsById(id);
     }
 }

@@ -35,14 +35,14 @@ public class ItemController {
 
 
     @PostMapping
-    public ItemDto addItem(@RequestBody @Valid ItemDto dto, @RequestHeader(userHeader) long ownerId) throws NotFoundException {
+    public ItemDto addItem(@RequestBody @Valid ItemDto dto, @RequestHeader(userHeader) long ownerId) {
         log.info("Request POST /items");
         return itemService.addItem(dto,ownerId);
     }
 
     @PatchMapping(value = "/{itemId}")
     public ItemDto updateItem(@RequestBody ItemDto dto, @PathVariable long itemId,
-                             @RequestHeader(userHeader) long ownerId) throws NotFoundException {
+                             @RequestHeader(userHeader) long ownerId) {
         log.info(String.format("Request PATCH /items/%s", itemId));
         return itemService.updateItem(dto,ownerId,itemId);
     }
@@ -66,8 +66,8 @@ public class ItemController {
     }
 
     @PostMapping("{itemId}/comment")
-    public Comment addComment(@RequestBody @Valid Comment dto, @PathVariable long itemId, @RequestHeader(userHeader) long authorId)
-            throws NotFoundException, BadRequestException {
+    public Comment addComment(@RequestBody @Valid Comment dto, @PathVariable long itemId,
+                              @RequestHeader(userHeader) long authorId) {
 
         log.info("Request POST /items/" + itemId + "/comment");
         return itemService.addComment(dto, itemId, authorId);

@@ -10,7 +10,7 @@ import ru.practicum.shareit.booking.dto.FullBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.enums.BookingState;
 import ru.practicum.shareit.booking.model.enums.Status;
-import ru.practicum.shareit.booking.storage.BookingRepository;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -29,7 +29,11 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
 
     @Override
-    public FullBookingDto addBooking(BookingDto dto, long bookerId) throws BadRequestException {
+    public FullBookingDto addBooking(BookingDto dto, long bookerId) {
+        if(dto.getStart() == null ||dto.getEnd() ==null){
+            throw new NullPointerException();
+        }
+
         if ((itemRepository.findById(dto.getItemId()).isEmpty() || userRepository.findById(bookerId).isEmpty())
                 || itemRepository.findById(dto.getItemId()).get().getOwnerId() == bookerId) {
             throw new NotFoundException();
@@ -62,7 +66,7 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public FullBookingDto approveBooking(long bookingId, boolean approved, long itemOwnerId) throws BadRequestException {
+    public FullBookingDto approveBooking(long bookingId, boolean approved, long itemOwnerId) {
         if (itemRepository.findById(bookingRepository.findById(bookingId).get()
                 .getItemId()).get().getOwnerId() != itemOwnerId) {
             throw new NotFoundException();
@@ -195,5 +199,20 @@ public class BookingServiceImpl implements BookingService {
 
         }
         return null;
+    }
+
+    @Override
+    public List<Booking> allBookingsForItem(Long itemId){
+        return bookingRepository.allBookingsForItem(itemId);
+    }
+
+    @Override
+    public List<Booking> findAllByItemsOwnerId(Long ownerId){
+        return bookingRepository.findAllByItemsOwnerId(ownerId);
+    }
+
+    @Override
+    public List<Booking> bookingsForItemAndBookerPast(Long bookerId, Long itemId, LocalDateTime now){
+        return bookingRepository.bookingsForItemAndBookerPast(bookerId,itemId,now);
     }
 }

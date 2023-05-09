@@ -29,7 +29,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public User add(@Valid @RequestBody User user) throws BadRequestException {
+    public User add(@Valid @RequestBody User user) {
         log.info("Request POST /users");
         return userService.add(user);
     }
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}")
-    public User getUserById(@PathVariable long id) throws NotFoundException {
+    public User getUserById(@PathVariable long id)  {
         log.info(String.format("Request GET /users/%s", id));
         return userService.getUserById(id);
     }
