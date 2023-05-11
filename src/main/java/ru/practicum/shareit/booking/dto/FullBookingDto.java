@@ -4,27 +4,26 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.model.enums.Status;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 
-import javax.validation.constraints.Future;
-import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
-@Data
 @Builder
+@Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookingDto {
+public class FullBookingDto {
 
     long id;
 
-    long itemId;
-
-    @FutureOrPresent
     LocalDateTime start;
 
-    @Future
     LocalDateTime end;
 
+    Item item;
+
+    User booker;
+
+    Status status;
 }

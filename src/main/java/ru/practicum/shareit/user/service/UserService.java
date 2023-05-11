@@ -1,19 +1,69 @@
 package ru.practicum.shareit.user.service;
 
-import ru.practicum.shareit.user.dto.UserDto;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.repository.UserRepository;
+
 
 import java.util.List;
 
-public interface UserService {
-    UserDto createUser(UserDto userDto);
+@Slf4j
+@Service
+@AllArgsConstructor
+public class UserService {
 
-    UserDto getUserById(Long id);
+    private final UserRepository userRepository;
 
-    List<UserDto> getAllUsers();
+    public User add(User user) {
+        log.info("Добавлен новый пользователь");
 
-    UserDto updateUser(UserDto userDto);
+        return userRepository.save(user);
+    }
 
-    void deleteUserById(Long id);
+    public User getUserById(long id) {
 
-    boolean isEmailDuplicate(Long id, String email);
+        if (userRepository.findById(id).isPresent()) {
+            log.info("Получен пользователь с id " + id);
+            return userRepository.findById(id).get();
+        } else {
+            throw new NotFoundException();
+        }
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User update(User user, long id) {
+        user.setId(id);
+        if (user.getName() == null) {
+            if (userRepository.findById(id).isPresent()) {
+                user.setName(userRepository.findById(id).get().getName());
+            } else {
+                throw new NotFoundException();
+            }
+        }
+        if (user.getEmail() == null) {
+            if (userRepository.findById(id).isPresent()) {
+                user.setEmail(userRepository.findById(id).get().getEmail());
+            } else {
+                throw new NotFoundException();
+            }
+        }
+        log.info("Обновлен пользователь с id " + id);
+        return userRepository.save(user);
+    }
+
+    public void delete(long id) {
+        log.info("Удалён пользователь с id " + id);
+        userRepository.deleteById(id);
+    }
+
+    public boolean existsById(Long id) {
+
+        return userRepository.existsById(id);
+    }
 }
