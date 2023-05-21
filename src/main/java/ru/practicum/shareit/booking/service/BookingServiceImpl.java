@@ -97,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
         if (userRepository.findById(bookerId).isEmpty()) {
             throw new NotFoundException();
         }
-        if(from < 0){
+        if (from < 0) {
             throw new BadRequestException();
         }
         PageRequest pageRequest = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "start"));
@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
         if (userRepository.findById(ownerId).isEmpty()) {
             throw new NotFoundException();
         }
-        if(from<0){
+        if (from < 0) {
             throw new BadRequestException();
         }
         PageRequest pageRequest = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "start"));
