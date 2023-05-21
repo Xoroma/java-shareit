@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -24,16 +25,14 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
+
+
+    private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    private final BookingRepository bookingRepository;
 
     @Override
-    public FullBookingDto addBooking(BookingDto dto, long bookerId) {
-        if (dto.getStart() == null || dto.getEnd() == null) {
-            throw new NullPointerException();
-        }
-
+    public FullBookingDto addBooking(BookingDto dto, long bookerId) throws BadRequestException {
         if ((itemRepository.findById(dto.getItemId()).isEmpty() || userRepository.findById(bookerId).isEmpty())
                 || itemRepository.findById(dto.getItemId()).get().getOwnerId() == bookerId) {
             throw new NotFoundException();
@@ -49,24 +48,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public FullBookingDto getBooking(long bookingId, long bookerId) {
-        Booking booking;
-        if (bookingRepository.findById(bookingId).isPresent()) {
-            booking = bookingRepository.findById(bookingId).get();
-        } else {
-            throw new NotFoundException();
-        }
-        if (booking.getBookerId() != bookerId &&
-                itemRepository.findById(booking.getItemId()).get().getOwnerId() != bookerId) {
-            throw new NotFoundException();
-        }
-        Status status = booking.getStatus();
-        return BookingMapper.toFullBookingFromBooking(booking, status, itemRepository, userRepository);
-    }
-
-
-    @Override
-    public FullBookingDto approveBooking(long bookingId, boolean approved, long itemOwnerId) {
+    public FullBookingDto approvingByOwner(long bookingId, boolean approved, long itemOwnerId) throws BadRequestException {
         if (itemRepository.findById(bookingRepository.findById(bookingId).get()
                 .getItemId()).get().getOwnerId() != itemOwnerId) {
             throw new NotFoundException();
@@ -94,29 +76,49 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    @Override
+    public FullBookingDto getBooking(long bookingId, long bookerId) {
+        Booking booking;
+        if (bookingRepository.findById(bookingId).isPresent()) {
+            booking = bookingRepository.findById(bookingId).get();
+        } else {
+            throw new NotFoundException();
+        }
+        if (booking.getBookerId() != bookerId &&
+                itemRepository.findById(booking.getItemId()).get().getOwnerId() != bookerId) {
+            throw new NotFoundException();
+        }
+        Status status = booking.getStatus();
+        return BookingMapper.toFullBookingFromBooking(booking, status, itemRepository, userRepository);
+    }
 
     @Override
-    public List<FullBookingDto> getAllBookingsByBookerId(long bookerId, BookingState state) {
+    public List<FullBookingDto> getAllBookingsByBookerId(long bookerId, BookingState state, Integer from, Integer size) {
         if (userRepository.findById(bookerId).isEmpty()) {
             throw new NotFoundException();
         }
+        if(from < 0){
+            throw new BadRequestException();
+        }
+        PageRequest pageRequest = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "start"));
         switch (state) {
             case ALL:
-                return bookingRepository.findAllByBookerId(bookerId, Sort.by(Sort.Direction.DESC, "start"))
+                return bookingRepository.findAllByBookerId(bookerId,
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case PAST:
                 return bookingRepository.findByBookerIdAndEndAfter(bookerId, LocalDateTime.now(),
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case FUTURE:
                 return bookingRepository.findByBookerIdAndStartAfter(bookerId, LocalDateTime.now(),
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
@@ -124,73 +126,82 @@ public class BookingServiceImpl implements BookingService {
             case CURRENT:
                 return bookingRepository.findByBookerIdAndEndIsBeforeAndStartIsAfter(bookerId, LocalDateTime.now(),
                                 LocalDateTime.now(),
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case WAITING:
                 return bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.WAITING,
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case REJECTED:
                 return bookingRepository.findAllByBookerIdAndStatus(bookerId, Status.REJECTED,
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             default:
                 return null;
+
         }
+
     }
 
     @Override
-    public List<FullBookingDto> getAllBookingByItemsByOwnerId(long ownerId, BookingState state) {
+    public List<FullBookingDto> getAllBookingByItemsByOwnerId(long ownerId, BookingState state, Integer from, Integer size) {
         if (userRepository.findById(ownerId).isEmpty()) {
             throw new NotFoundException();
         }
-
+        if(from<0){
+            throw new BadRequestException();
+        }
+        PageRequest pageRequest = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "start"));
         switch (state) {
+
             case ALL:
-                return bookingRepository.bookingsForItem(ownerId, Sort.by(Sort.Direction.DESC, "start"))
+                return bookingRepository.bookingsForItem(ownerId,
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case PAST:
                 return bookingRepository.bookingsForItemPast(ownerId, LocalDateTime.now(),
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case FUTURE:
                 return bookingRepository.bookingsForItemFuture(ownerId, LocalDateTime.now(),
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case CURRENT:
                 return bookingRepository.bookingsForItemCurrent(ownerId, LocalDateTime.now(),
-                                Sort.by(Sort.Direction.DESC, "start"))
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .collect(Collectors.toList());
             case WAITING:
-                return bookingRepository.bookingsForItem(ownerId, Sort.by(Sort.Direction.DESC, "start"))
+                return bookingRepository.bookingsForItem(ownerId,
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
                         .filter(l -> l.getStatus() == Status.WAITING)
                         .collect(Collectors.toList());
             case REJECTED:
-                return bookingRepository.bookingsForItem(ownerId, Sort.by(Sort.Direction.DESC, "start"))
+                return bookingRepository.bookingsForItem(ownerId,
+                                pageRequest)
                         .stream()
                         .map(l -> BookingMapper.toFullBookingFromBooking(l, l.getStatus(),
                                 itemRepository, userRepository))
@@ -200,21 +211,4 @@ public class BookingServiceImpl implements BookingService {
         }
         return null;
     }
-
-    @Override
-    public List<Booking> allBookingsForItem(Long itemId) {
-
-        return bookingRepository.allBookingsForItem(itemId);
-    }
-
-    @Override
-    public List<Booking> findAllByItemsOwnerId(Long ownerId) {
-        return bookingRepository.findAllByItemsOwnerId(ownerId);
-    }
-
-    @Override
-    public List<Booking> bookingsForItemAndBookerPast(Long bookerId, Long itemId, LocalDateTime now) {
-        return bookingRepository.bookingsForItemAndBookerPast(bookerId,itemId,now);
-    }
-
 }

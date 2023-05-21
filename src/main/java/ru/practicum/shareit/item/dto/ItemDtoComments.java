@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemDtoWithCommments {
+public class ItemDtoComments {
     long id;
 
     @NotNull
@@ -32,11 +32,12 @@ public class ItemDtoWithCommments {
 
     List<Comment> comments;
 
-    public ItemDtoWithCommments(long id, String name, String description, Boolean available) {
+    public ItemDtoComments(long id, String name, String description, Boolean available) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
     }
+
 }
 

@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.item.dto.ItemDtoWithCommments;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDtoComments;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 /**
@@ -38,29 +40,39 @@ public class ItemController {
         return itemService.addItem(dto,ownerId);
     }
 
-    @PatchMapping(value = "/{itemId}")
-    public ItemDto updateItem(@RequestBody ItemDto dto, @PathVariable long itemId,
-                             @RequestHeader(userHeader) long ownerId) {
-        log.info(String.format("Request PATCH /items/%s", itemId));
-        return itemService.updateItem(dto,ownerId,itemId);
-    }
-
     @GetMapping(value = "/{itemId}")
-    public ItemDtoWithCommments getItem(@PathVariable long itemId, @RequestHeader(userHeader) long ownerId) {
-        log.info(String.format("Request GET /items/%s", itemId));
+    public ItemDtoComments getItem(@PathVariable long itemId, @RequestHeader(userHeader) long ownerId) {
+        log.info(String.format("Получен запрос GET /items/%s", itemId));
         return itemService.getItem(itemId,ownerId);
     }
 
+    @PatchMapping(value = "/{itemId}")
+    public ItemDto patchItem(@RequestBody ItemDto dto, @PathVariable long itemId,
+                             @RequestHeader(userHeader) long ownerId) throws NotFoundException {
+
+        log.info(String.format("PATCH /items/%s", itemId));
+        return itemService.patchItem(dto,ownerId,itemId);
+    }
+
+
     @GetMapping
-    public List<ItemDtoWithCommments> getAllItemsByOwner(@RequestHeader(userHeader) long ownerId) {
-        log.info("Request GET /items");
-        return itemService.getAllItemsByOwner(ownerId);
+    public List<ItemDtoComments> getAllItemsByOwner(@RequestHeader(userHeader) long ownerId,
+                                                    @RequestParam(required = false, defaultValue = "0")
+                                               @Min(0) Integer from,
+                                                    @RequestParam(required = false, defaultValue = "10")
+                                               Integer size) {
+        log.info("GET /items");
+        return itemService.getAllItemsByOwner(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItem(@RequestParam String text, @RequestHeader(userHeader) long ownerId) {
-        log.info(String.format("Request GET /items/search?text=%s", text));
-        return itemService.searchItem(text.toLowerCase(),ownerId);
+    public List<ItemDto> searchItem(@RequestParam String text, @RequestHeader(userHeader) long ownerId,
+                                    @RequestParam(required = false, defaultValue = "0")
+                                    @Min(0) Integer from,
+                                    @RequestParam(required = false, defaultValue = "10")
+                                    Integer size) {
+        log.info(String.format("Получен запрос GET /items/search?text=%s", text));
+        return itemService.searchItem(text.toLowerCase(), ownerId, from, size);
     }
 
     @PostMapping("{itemId}/comment")

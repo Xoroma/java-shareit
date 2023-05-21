@@ -39,11 +39,11 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public FullBookingDto approveBooking(@PathVariable long bookingId, @RequestParam boolean approved,
+    public FullBookingDto approvingByOwner(@PathVariable long bookingId, @RequestParam boolean approved,
                                          @RequestHeader(userHeader) long bookerId) {
 
         log.info("Request from PATCH /bookings/ " + bookingId + "?approved= " + approved);
-        return bookingService.approveBooking(bookingId, approved, bookerId);
+        return bookingService.approvingByOwner(bookingId, approved, bookerId);
     }
 
     @GetMapping("/{bookingId}")
@@ -55,18 +55,20 @@ public class BookingController {
 
     @GetMapping
     public List<FullBookingDto> getAllBookingsByBookerId(@RequestHeader(userHeader) long bookerId,
-                                                         @RequestParam(defaultValue = "ALL") BookingState state) {
-
-        log.info("Request GET /bookings?state= " + state.toString());
-        return bookingService.getAllBookingsByBookerId(bookerId, state);
+                                                         @RequestParam(defaultValue = "ALL") BookingState state,
+                                                         @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
+        log.info("GET /bookings?state=" + state.toString());
+        return bookingService.getAllBookingsByBookerId(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<FullBookingDto> getAllBookingItemsByBookerId(@RequestHeader(userHeader) long ownerId,
-                                                             @RequestParam(defaultValue = "ALL") BookingState state) {
-
-        log.info("Request GET /bookings/owner?state=" + state.toString());
-        return bookingService.getAllBookingByItemsByOwnerId(ownerId, state);
+                                                             @RequestParam(defaultValue = "ALL") BookingState state,
+                                                             @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                             @RequestParam(required = false, defaultValue = "10") Integer size) {
+        log.info("GET /bookings/owner?state=" + state.toString());
+        return bookingService.getAllBookingByItemsByOwnerId(ownerId, state, from, size);
     }
 
 }

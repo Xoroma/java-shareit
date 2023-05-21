@@ -2,12 +2,14 @@ package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoWithCommments;
+import ru.practicum.shareit.item.dto.ItemDtoComments;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
@@ -15,7 +17,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 
 import java.time.LocalDateTime;
@@ -33,56 +35,22 @@ import static ru.practicum.shareit.item.mapper.ItemMapper.*;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final UserService userService;
-    private final BookingService bookingService;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     @Override
-    public ItemDto addItem(ItemDto dto, long ownerId)  {
+    public ItemDto addItem(ItemDto dto, long ownerId) throws NotFoundException {
         log.info("Добавлен предмет");
-        if (userService.existsById(ownerId)) {
+        if (userRepository.existsById(ownerId)) {
             return mapToItemDto(itemRepository.save(mapToItem(dto, ownerId)));
         } else {
             throw new NotFoundException();
         }
     }
 
-
-
-    public long getItemOwnerId(long itemId) {
-        return itemRepository.getReferenceById(itemId).getOwnerId();
-    }
-
     @Override
-    public ItemDtoWithCommments getItem(long itemId, long ownerId)  {
-
-        if (itemRepository.existsById(itemId)) {
-            Item item = itemRepository.getReferenceById(itemId);
-            List<Comment> comments = commentRepository.findAllByItemId(itemId);
-            log.info("Получен предмет с id " + itemId);
-
-            List<Booking> bookings;
-
-            if (item.getOwnerId() == ownerId) {
-                bookings = new ArrayList<>(bookingService.allBookingsForItem(itemId));
-            } else {
-                bookings = Collections.emptyList();
-            }
-
-            if (bookings.size() != 0 && item.getOwnerId() == ownerId) {
-                return mapToItemDtoWithComments(
-                        item, bookings, comments
-                );
-            } else {
-                return mapToItemDtoWithComments(item, null, comments);
-            }
-        } else {
-            throw new NotFoundException();
-        }
-    }
-
-    @Override
-    public ItemDto updateItem(ItemDto dto, long ownerId, long itemId) {
+    public ItemDto patchItem(ItemDto dto, long ownerId, long itemId) throws NotFoundException {
         dto.setId(itemId);
         if (getItemOwnerId(itemId) != ownerId) {
             throw new NotFoundException();
@@ -106,19 +74,54 @@ public class ItemServiceImpl implements ItemService {
         return mapToItemDto(itemRepository.save(mapToItem(dto, ownerId)));
     }
 
+    public long getItemOwnerId(long itemId) {
+        return itemRepository.getReferenceById(itemId).getOwnerId();
+    }
+
     @Override
-    public List<ItemDtoWithCommments> getAllItemsByOwner(long ownerId) {
-        List<ItemDtoWithCommments> allItems =
-                itemRepository.findAll().stream()
+    public ItemDtoComments getItem(long itemId, long ownerId) throws NotFoundException {
+
+        if (itemRepository.existsById(itemId)) {
+            Item item = itemRepository.getReferenceById(itemId);
+            List<Comment> comments = commentRepository.findAllByItemId(itemId);
+            log.info("Получен предмет с id " + itemId);
+
+            List<Booking> bookings;
+
+            if (item.getOwnerId() == ownerId) {
+                bookings = new ArrayList<>(bookingRepository.allBookingsForItem(itemId,
+                        Sort.by(Sort.Direction.ASC, "start")));
+            } else {
+                bookings = Collections.emptyList();
+            }
+
+            if (bookings.size() != 0 && item.getOwnerId() == ownerId) {
+                return mapToItemDtoComments(
+                        item, bookings, comments
+                );
+            } else {
+                return mapToItemDtoComments(item, null, null, comments);
+            }
+        } else {
+            throw new NotFoundException();
+        }
+    }
+
+    @Override
+    public List<ItemDtoComments> getAllItemsByOwner(long ownerId, Integer from, Integer size) {
+        PageRequest pageRequest = PageRequest.of((from / size), size);
+        List<ItemDtoComments> allItems =
+                itemRepository.findAll(pageRequest)
+                        .stream()
                         .filter(l -> l.getOwnerId() == ownerId)
-                        .map(l -> ItemMapper.mapToItemDtoWithComments(l, null, null))
-                        .sorted(Comparator.comparing(ItemDtoWithCommments::getId))
+                        .map(l -> ItemMapper.mapToItemDtoComments(l, null, null, null))
+                        .sorted(Comparator.comparing(ItemDtoComments::getId))
                         .collect(Collectors.toList());
 
         List<Comment> allCommentsByItemsOwner = commentRepository.findAllByItemsOwnerId(ownerId);
-        List<Booking> allBookingsByItemsOwner = bookingService.findAllByItemsOwnerId(ownerId);
+        List<Booking> allBookingsByItemsOwner = bookingRepository.findAllByItemsOwnerId(ownerId);
 
-        for (ItemDtoWithCommments item : allItems) {
+        for (ItemDtoComments item : allItems) {
 
             List<Comment> comments = allCommentsByItemsOwner
                     .stream()
@@ -140,9 +143,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItem(String text, long ownerId) {
+    public List<ItemDto> searchItem(String text, long ownerId, Integer from, Integer size) {
         if (!text.equals("")) {
-            return itemRepository.search(text)
+            PageRequest pageRequest = PageRequest.of((from / size), size);
+            return itemRepository.search(text, pageRequest)
                     .stream()
                     .filter(Item::isAvailable)
                     .map(ItemMapper::mapToItemDto)
@@ -153,9 +157,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Comment addComment(Comment dto, long itemId, long authorId) {
-        if (bookingService.bookingsForItemAndBookerPast(authorId, itemId, LocalDateTime.now()).size() != 0) {
-            User author = userService.getUserById(authorId);
+    public Comment addComment(Comment dto, long itemId, long authorId) throws BadRequestException {
+        if (bookingRepository.bookingsForItemAndBookerPast(authorId, itemId, LocalDateTime.now()).size() != 0) {
+            User author = userRepository.findById(authorId).get();
             Comment comment = new Comment();
             comment.setAuthorId(authorId);
             comment.setItemId(itemId);
