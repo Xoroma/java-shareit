@@ -13,8 +13,8 @@ import ru.practicum.shareit.booking.dto.FullBookingDto;
 import ru.practicum.shareit.booking.model.enums.Status;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.ExceptionsHandler;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.user.User;
 
 import java.nio.charset.StandardCharsets;
@@ -32,33 +32,30 @@ public class BookingControllerTest {
     @MockBean
     BookingService bookingService;
     @Autowired
-    ObjectMapper objectMapper;
+    ObjectMapper mapper;
     @Autowired
     private MockMvc mvc;
 
     @Test
-    void createTest() throws Exception {
-
+    void addBooking() throws Exception {
         final BookingDto bookingDto = BookingDto.builder()
                 .itemId(1)
                 .start(LocalDateTime.now())
                 .end(LocalDateTime.now().plusHours(1)).build();
-
-        ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
-
+        ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(bookingService.addBooking(any(), anyLong()))
                 .thenReturn(FullBookingDto.builder()
                         .id(1)
                         .start(LocalDateTime.now().minusHours(1))
                         .end(LocalDateTime.now().plusHours(1))
-                        .booker(new User(1, "testovich", "testovich@test.com"))
-                        .item(ItemMapper.mapToItem(itemDto, 2))
+                        .booker(new User(1, "testovich", "test@test.com"))
+                        .item(ItemMapper.toItem(itemDto, 2))
                         .status(Status.WAITING)
                         .build());
 
         mvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", "1")
-                        .content(objectMapper.writeValueAsString(bookingDto))
+                        .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -66,30 +63,27 @@ public class BookingControllerTest {
     }
 
     @Test
-    void approvingByOwner() throws Exception {
-
+    void approveBooking() throws Exception {
         final BookingDto bookingDto = new BookingDto();
         bookingDto.setId(1);
         bookingDto.setItemId(1);
         bookingDto.setStart(LocalDateTime.now());
         bookingDto.setEnd(LocalDateTime.now().plusHours(1));
-
-        ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
-
+        ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(bookingService.approvingByOwner(anyLong(), anyBoolean(), anyLong()))
                 .thenReturn(FullBookingDto.builder()
                         .id(1)
                         .start(LocalDateTime.now())
                         .end(LocalDateTime.now().plusHours(1))
-                        .booker(new User(1, "testovich", "testovich@test.com"))
-                        .item(ItemMapper.mapToItem(itemDto, 2))
+                        .booker(new User(1, "testovich", "test@test.com"))
+                        .item(ItemMapper.toItem(itemDto, 2))
                         .status(Status.APPROVED)
                         .build());
 
         mvc.perform(patch("/bookings/1")
                         .header("X-Sharer-User-Id", "1")
                         .param("approved", "true")
-                        .content(objectMapper.writeValueAsString(bookingDto))
+                        .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -98,28 +92,25 @@ public class BookingControllerTest {
 
     @Test
     void getBooking() throws Exception {
-
         final BookingDto bookingDto = new BookingDto();
-
         bookingDto.setId(1);
         bookingDto.setItemId(1);
         bookingDto.setStart(LocalDateTime.now());
         bookingDto.setEnd(LocalDateTime.now().plusHours(1));
-        ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
-
+        ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(bookingService.getBooking(anyLong(), anyLong()))
                 .thenReturn(FullBookingDto.builder()
                         .id(1)
                         .start(LocalDateTime.now())
                         .end(LocalDateTime.now().plusHours(1))
-                        .booker(new User(1, "testovich", "testovich@test.com"))
-                        .item(ItemMapper.mapToItem(itemDto, 2))
+                        .booker(new User(1, "testovich", "test@test.com"))
+                        .item(ItemMapper.toItem(itemDto, 2))
                         .status(Status.WAITING)
                         .build());
 
         mvc.perform(get("/bookings/1")
                         .header("X-Sharer-User-Id", "1")
-                        .content(objectMapper.writeValueAsString(bookingDto))
+                        .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -128,27 +119,25 @@ public class BookingControllerTest {
 
     @Test
     void getAllBooking() throws Exception {
-
         final BookingDto bookingDto = new BookingDto();
         bookingDto.setId(1);
         bookingDto.setItemId(1);
         bookingDto.setStart(LocalDateTime.now());
         bookingDto.setEnd(LocalDateTime.now().plusHours(1));
-        ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
-
+        ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(bookingService.getAllBookingsByBookerId(anyLong(), any(), anyInt(), anyInt()))
                 .thenReturn(List.of(FullBookingDto.builder()
                         .id(1)
                         .start(LocalDateTime.now())
                         .end(LocalDateTime.now().plusHours(1))
-                        .booker(new User(1, "testovich", "testovich@test.com"))
-                        .item(ItemMapper.mapToItem(itemDto, 2))
+                        .booker(new User(1, "testovich", "test@test.com"))
+                        .item(ItemMapper.toItem(itemDto, 2))
                         .status(Status.WAITING)
                         .build()));
 
         mvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", "1")
-                        .content(objectMapper.writeValueAsString(bookingDto))
+                        .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -157,27 +146,25 @@ public class BookingControllerTest {
 
     @Test
     void getAllBookingItems() throws Exception {
-
         final BookingDto bookingDto = new BookingDto();
         bookingDto.setId(1);
         bookingDto.setItemId(1);
         bookingDto.setStart(LocalDateTime.now());
         bookingDto.setEnd(LocalDateTime.now().plusHours(1));
-        ItemDto itemDto = new ItemDto(1, "testovich", "testDesrc", true, 0);
-
+        ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(bookingService.getAllBookingByItemsByOwnerId(anyLong(), any(), anyInt(), anyInt()))
                 .thenReturn(List.of(FullBookingDto.builder()
                         .id(1)
                         .start(LocalDateTime.now())
                         .end(LocalDateTime.now().plusHours(1))
-                        .booker(new User(1, "testovich", "testovich@test.com"))
-                        .item(ItemMapper.mapToItem(itemDto, 2))
+                        .booker(new User(1, "testovich", "test@test.com"))
+                        .item(ItemMapper.toItem(itemDto, 2))
                         .status(Status.WAITING)
                         .build()));
 
         mvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", "1")
-                        .content(objectMapper.writeValueAsString(bookingDto))
+                        .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -186,19 +173,17 @@ public class BookingControllerTest {
 
     @Test
     void getAllBookingItemsUnsupportedStatus() throws Exception {
-
         final BookingDto bookingDto = new BookingDto();
         bookingDto.setId(1);
         bookingDto.setItemId(1);
         bookingDto.setStart(LocalDateTime.now());
-        bookingDto.setEnd(LocalDateTime.now().plusHours(2));
-
+        bookingDto.setEnd(LocalDateTime.now().plusHours(1));
         when(bookingService.getAllBookingByItemsByOwnerId(anyLong(), any(), anyInt(), anyInt()))
                 .thenThrow(MethodArgumentTypeMismatchException.class);
 
         mvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", "1")
-                        .content(objectMapper.writeValueAsString(bookingDto))
+                        .content(mapper.writeValueAsString(bookingDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

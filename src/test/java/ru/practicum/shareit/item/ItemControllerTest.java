@@ -7,10 +7,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.item.dto.ItemDtoComments;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.model.dto.GetItemDto;
+import ru.practicum.shareit.item.model.dto.ItemDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -25,16 +24,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ItemControllerTest {
     @MockBean
     ItemService itemService;
-
     @Autowired
     ObjectMapper mapper;
-
     @Autowired
     private MockMvc mvc;
 
     @Test
     void saveNewItem() throws Exception {
-        final ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
+        final ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(itemService.addItem(any(), anyLong()))
                 .thenReturn(itemDto);
 
@@ -49,7 +46,7 @@ public class ItemControllerTest {
 
     @Test
     void saveNewItemNoHeader() throws Exception {
-        final ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
+        final ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(itemService.addItem(any(), anyLong()))
                 .thenReturn(itemDto);
 
@@ -63,7 +60,7 @@ public class ItemControllerTest {
 
     @Test
     void patchItem() throws Exception {
-        final ItemDto itemDto = new ItemDto(1, "testovich", "testDescr", true, 0);
+        final ItemDto itemDto = new ItemDto(1, "testovich", "testtest", true, 0);
         when(itemService.patchItem(any(), anyLong(), anyLong()))
                 .thenReturn(itemDto);
 
@@ -78,7 +75,7 @@ public class ItemControllerTest {
 
     @Test
     void getItem() throws Exception {
-        final ItemDtoComments itemDto = new ItemDtoComments(1, "testovich", "testDescr", true, null,
+        final GetItemDto itemDto = new GetItemDto(1, "testovich", "testtest", true, null,
                 null, null);
         when(itemService.getItem(anyLong(), anyLong()))
                 .thenReturn(itemDto);
@@ -94,7 +91,7 @@ public class ItemControllerTest {
 
     @Test
     void getAllItems() throws Exception {
-        final ItemDtoComments itemDto = new ItemDtoComments(1, "testovich", "testDescr", true, null,
+        final GetItemDto itemDto = new GetItemDto(1, "testovich", "testtest", true, null,
                 null, null);
         when(itemService.getAllItemsByOwner(anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(itemDto));
@@ -110,7 +107,7 @@ public class ItemControllerTest {
 
     @Test
     void searchAllItems() throws Exception {
-        final ItemDto itemDto = new ItemDto(1, "searchItem", "testDescr",
+        final ItemDto itemDto = new ItemDto(1, "searchItem", "testtest",
                 true, 0);
         when(itemService.searchItem(anyString(), anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(itemDto));
@@ -128,7 +125,6 @@ public class ItemControllerTest {
     @Test
     void addComment() throws Exception {
         final Comment comment = new Comment();
-
         comment.setText("testovich");
         comment.setItemId(1);
         comment.setCreated(LocalDateTime.now());

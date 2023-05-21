@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.service;
+package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,16 +9,15 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoComments;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.dto.GetItemDto;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.item.mapper.ItemMapper.*;
+import static ru.practicum.shareit.item.model.dto.ItemMapper.*;
 
 @Slf4j
 @Service
@@ -43,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addItem(ItemDto dto, long ownerId) throws NotFoundException {
         log.info("Добавлен предмет");
         if (userRepository.existsById(ownerId)) {
-            return mapToItemDto(itemRepository.save(mapToItem(dto, ownerId)));
+            return toItemDto(itemRepository.save(toItem(dto, ownerId)));
         } else {
             throw new NotFoundException();
         }
@@ -71,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException();
         }
         log.info("Обновлен предмет с id " + itemId);
-        return mapToItemDto(itemRepository.save(mapToItem(dto, ownerId)));
+        return toItemDto(itemRepository.save(toItem(dto, ownerId)));
     }
 
     public long getItemOwnerId(long itemId) {
@@ -79,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoComments getItem(long itemId, long ownerId) throws NotFoundException {
+    public GetItemDto getItem(long itemId, long ownerId) throws NotFoundException {
 
         if (itemRepository.existsById(itemId)) {
             Item item = itemRepository.getReferenceById(itemId);
@@ -96,11 +95,11 @@ public class ItemServiceImpl implements ItemService {
             }
 
             if (bookings.size() != 0 && item.getOwnerId() == ownerId) {
-                return mapToItemDtoComments(
+                return toGetItemDto(
                         item, bookings, comments
                 );
             } else {
-                return mapToItemDtoComments(item, null, null, comments);
+                return toGetItemDto(item, null, null, comments);
             }
         } else {
             throw new NotFoundException();
@@ -108,20 +107,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoComments> getAllItemsByOwner(long ownerId, Integer from, Integer size) {
+    public List<GetItemDto> getAllItemsByOwner(long ownerId, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of((from / size), size);
-        List<ItemDtoComments> allItems =
+        List<GetItemDto> allItems =
                 itemRepository.findAll(pageRequest)
                         .stream()
                         .filter(l -> l.getOwnerId() == ownerId)
-                        .map(l -> ItemMapper.mapToItemDtoComments(l, null, null, null))
-                        .sorted(Comparator.comparing(ItemDtoComments::getId))
+                        .map(l -> ItemMapper.toGetItemDto(l, null, null, null))
+                        .sorted(Comparator.comparing(GetItemDto::getId))
                         .collect(Collectors.toList());
 
         List<Comment> allCommentsByItemsOwner = commentRepository.findAllByItemsOwnerId(ownerId);
         List<Booking> allBookingsByItemsOwner = bookingRepository.findAllByItemsOwnerId(ownerId);
 
-        for (ItemDtoComments item : allItems) {
+        for (GetItemDto item : allItems) {
 
             List<Comment> comments = allCommentsByItemsOwner
                     .stream()
@@ -149,7 +148,7 @@ public class ItemServiceImpl implements ItemService {
             return itemRepository.search(text, pageRequest)
                     .stream()
                     .filter(Item::isAvailable)
-                    .map(ItemMapper::mapToItemDto)
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         } else {
             return List.of();

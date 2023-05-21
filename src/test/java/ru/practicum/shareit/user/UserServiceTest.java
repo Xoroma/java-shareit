@@ -9,9 +9,8 @@ import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,13 +31,13 @@ public class UserServiceTest {
     @Test
     void testDataAnnotation() {
 
-        UserDto userDto = new UserDto(1, "Testovich", "testovich@test.com");
+        UserDto userDto = new UserDto(1, "testovich", "test@test.com");
 
         assertEquals(1, userDto.getId());
-        assertEquals("Testovich", userDto.getName());
-        assertEquals("testovich@test.com", userDto.getEmail());
+        assertEquals("testovich", userDto.getName());
+        assertEquals("test@test.com", userDto.getEmail());
 
-        UserDto userDto2 = new UserDto(1, "Testovich", "testovich@test.com");
+        UserDto userDto2 = new UserDto(1, "testovich", "test@test.com");
 
         assertEquals(userDto, userDto2);
         assertEquals(userDto.hashCode(), userDto2.hashCode());
@@ -48,7 +47,7 @@ public class UserServiceTest {
     @Test
     void addNewUser() throws BadRequestException, NotFoundException {
         long userId = 0L;
-        User expectedUser = new User(userId, "Testovich", "testovich@test.com");
+        User expectedUser = new User(userId, "testovich", "test@test.com");
         when(userRepository.save(any()))
                 .thenReturn(expectedUser);
         User actualUser = userService.add(expectedUser);
@@ -59,7 +58,7 @@ public class UserServiceTest {
     @Test
     void addNewUserDuplicateEmail() throws NotFoundException {
         long userId = 0L;
-        User expectedUser = new User(userId, "Testovich", "testovich@test.com");
+        User expectedUser = new User(userId, "testovich", "test@test.com");
         when(userRepository.save(any()))
                 .thenThrow(ConflictException.class);
 
@@ -69,8 +68,8 @@ public class UserServiceTest {
     @Test
     void getUserById() {
         long userId = 0L;
-        UserDto dto = new UserDto(userId, "Testovich", "testovich@test.com");
-        User expectedUser = UserMapper.mapToUser(dto);
+        UserDto dto = new UserDto(userId, "testovich", "test@test.com");
+        User expectedUser = UserMapper.toUser(dto);
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(expectedUser));
         User actualUser = userService.getUserById(userId);
@@ -90,8 +89,8 @@ public class UserServiceTest {
     @Test
     void updateUserByIdNotFound() {
         long userId = 0L;
-        UserDto dto = new UserDto(userId, null, "testovich@test.com");
-        User expectedUser = UserMapper.mapToUser(dto);
+        UserDto dto = new UserDto(userId, null, "test@test.com");
+        User expectedUser = UserMapper.toUser(dto);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
@@ -101,8 +100,8 @@ public class UserServiceTest {
     @Test
     void updateUserByIdNotFoundNoEmail() {
         long userId = 0L;
-        UserDto dto = new UserDto(userId, "Testovich", null);
-        User expectedUser = UserMapper.mapToUser(dto);
+        UserDto dto = new UserDto(userId, "testovich", null);
+        User expectedUser = UserMapper.toUser(dto);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
@@ -112,7 +111,7 @@ public class UserServiceTest {
     @Test
     void getAllUsers() {
         long userId = 0L;
-        User expectedUser = new User(userId, "Testovich", "testovich@test.com");
+        User expectedUser = new User(userId, "testovich", "test@test.com");
         when(userRepository.findAll())
                 .thenReturn(List.of(expectedUser));
         List<User> actualUser = userService.getAllUsers();
@@ -123,8 +122,8 @@ public class UserServiceTest {
     @Test
     void updateUserByIdNoEmail() {
         long userId = 1L;
-        User expectedUser = new User(userId, "Testovich", "testovich@test.com");
-        User noEmailUser = new User(userId, "Testovich", null);
+        User expectedUser = new User(userId, "testovich", "test@test.com");
+        User noEmailUser = new User(userId, "testovich", null);
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(expectedUser));
         when(userRepository.save(any()))
@@ -137,8 +136,8 @@ public class UserServiceTest {
     @Test
     void updateUserByIdNoName() {
         long userId = 1L;
-        User expectedUser = new User(userId, "Testovich", "testovich@test.com");
-        User noEmailUser = new User(userId, null, "testovich@test.com");
+        User expectedUser = new User(userId, "testovich", "test@test.com");
+        User noEmailUser = new User(userId, null, "test@test.com");
         when(userRepository.findById(userId))
                 .thenReturn(Optional.of(expectedUser));
         when(userRepository.save(any()))
@@ -151,7 +150,7 @@ public class UserServiceTest {
     @Test
     public void testDeleteUser() {
         long userId = 1L;
-        User expectedUser = new User(userId, "Testovich", "testovich@test.com");
+        User expectedUser = new User(userId, "testovich", "test@test.com");
         userRepository.save(expectedUser);
         long id = expectedUser.getId();
 
@@ -168,7 +167,7 @@ public class UserServiceTest {
 
         User user = new User();
         user.setId(1);
-        user.setName("Test");
+        user.setName("testovich");
 
         userController.delete(1);
 

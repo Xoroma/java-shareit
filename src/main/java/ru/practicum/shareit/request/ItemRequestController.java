@@ -13,6 +13,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
+/**
+ * TODO Sprint add-item-requests.
+ */
 @Slf4j
 @RestController
 @AllArgsConstructor
@@ -22,23 +25,23 @@ public class ItemRequestController {
 
     private final ItemRequestService itemRequestService;
 
-    private final String header = "X-Sharer-User-Id";
+    private final String userHeader = "X-Sharer-User-Id";
 
     @PostMapping
     public ItemRequest addRequest(@Valid @RequestBody ItemRequestDto request,
-                                  @RequestHeader(header) long userId) {
-        log.info("Get POST /requests");
+                                  @RequestHeader(userHeader) long userId) {
+        log.info("POST /requests");
         return itemRequestService.addRequest(request, userId);
     }
 
     @GetMapping
-    public List<GetItemRequestDto> getRequests(@RequestHeader(header) long userId) {
+    public List<GetItemRequestDto> getRequests(@RequestHeader(userHeader) long userId) {
         log.info("GET /requests");
         return itemRequestService.getRequests(userId);
     }
 
     @GetMapping("/all")
-    public List<GetItemRequestDto> getRequestsPageable(@RequestHeader(header) long userId,
+    public List<GetItemRequestDto> getRequestsPageable(@RequestHeader(userHeader) long userId,
                                                        @RequestParam(required = false, defaultValue = "0")
                                                        @Min(0) Integer from,
                                                        @RequestParam(required = false, defaultValue = "1")
@@ -48,8 +51,9 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public GetItemRequestDto getRequestById(@RequestHeader(header) long userId, @PathVariable long requestId) {
+    public GetItemRequestDto getRequestById(@RequestHeader(userHeader) long userId, @PathVariable long requestId) {
         log.info("GET /requests/" + requestId);
         return itemRequestService.getRequestById(userId, requestId);
     }
 }
+

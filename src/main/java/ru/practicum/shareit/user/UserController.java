@@ -2,15 +2,9 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.user.service.UserService;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -27,32 +21,32 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public User add(@Valid @RequestBody User user) {
-        log.info("Request POST /users");
+    public User add(@Valid @RequestBody User user) throws BadRequestException {
+        log.info("POST /users");
         return userService.add(user);
+    }
+
+    @GetMapping(value = "/{id}")
+    public User getUserById(@PathVariable long id) throws NotFoundException {
+        log.info(String.format("GET /users/%s", id));
+        return userService.getUserById(id);
     }
 
     @GetMapping
     public List<User> getAllUsers() {
-        log.info("Request GET /users");
+        log.info("GET /users");
         return userService.getAllUsers();
-    }
-
-    @GetMapping(value = "/{id}")
-    public User getUserById(@PathVariable long id)  {
-        log.info(String.format("Request GET /users/%s", id));
-        return userService.getUserById(id);
     }
 
     @PatchMapping(value = "/{id}")
     public User update(@RequestBody User user, @PathVariable long id) {
-        log.info(String.format("Request PATCH /users/%s", id));
+        log.info(String.format("PATCH /users/%s", id));
         return userService.update(user, id);
     }
 
     @DeleteMapping(value = "/{id}")
     public void delete(@PathVariable long id) {
-        log.info(String.format("Request DELETE /users/%s", id));
+        log.info(String.format("DELETE /users/%s", id));
         userService.delete(id);
     }
 }

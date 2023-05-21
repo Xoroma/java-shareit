@@ -7,6 +7,9 @@ import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * TODO Sprint add-item-requests.
+ */
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -16,3 +19,4 @@ public class ItemRequestDto {
     String description;
 
 }
+

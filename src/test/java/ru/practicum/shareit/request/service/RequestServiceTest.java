@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.request.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,16 +7,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.GetItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
-import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
@@ -41,7 +40,7 @@ public class RequestServiceTest {
     @Test
     public void testSetDescription() {
         ItemRequest itemRequest = new ItemRequest();
-        String description = "testovichDescription";
+        String description = "test description";
         itemRequest.setDescription(description);
         assertEquals(description, itemRequest.getDescription());
     }
@@ -65,10 +64,10 @@ public class RequestServiceTest {
         long userId = 1L;
         long itemId = 1L;
         long ownerId = 1L;
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         ItemRequestDto dto = new ItemRequestDto();
-        dto.setDescription("test");
+        dto.setDescription("testovich");
         ItemRequest request = ItemRequestMapper.toItemRequest(dto, userId);
         GetItemRequestDto getItemRequestDto = ItemRequestMapper.toGetItemRequestDto(request);
         when(itemRequestRepository.findAllByRequesterId(anyLong(), any()))
@@ -87,17 +86,13 @@ public class RequestServiceTest {
         long userId = 1L;
         long itemId = 1L;
         long ownerId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         ItemRequestDto dto = new ItemRequestDto();
         dto.setDescription("testovich");
-
         ItemRequest request = ItemRequestMapper.toItemRequest(dto, userId);
         GetItemRequestDto getItemRequestDto = ItemRequestMapper.toGetItemRequestDto(request);
         final Page<ItemRequest> page = new PageImpl<>(List.of(request));
-
         when(itemRequestRepository.findAllByRequesterIdIsNot(anyLong(), any()))
                 .thenReturn(page);
         when(userRepository.existsById(anyLong()))
@@ -114,16 +109,12 @@ public class RequestServiceTest {
         long userId = 1L;
         long itemId = 1L;
         long ownerId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         ItemRequestDto dto = new ItemRequestDto();
         dto.setDescription("testovich");
-
         ItemRequest request = ItemRequestMapper.toItemRequest(dto, userId);
         GetItemRequestDto getItemRequestDto = ItemRequestMapper.toGetItemRequestDto(request);
-
         when(itemRequestRepository.existsById(anyLong()))
                 .thenReturn(true);
         when(userRepository.existsById(anyLong()))

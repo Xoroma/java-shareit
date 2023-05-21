@@ -5,8 +5,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.GetItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -40,7 +40,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (userRepository.existsById(userId)) {
             List<ItemDto> items = itemRepository.findAllByRequesterId(userId)
                     .stream()
-                    .map(ItemMapper::mapToItemDto)
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
             List<GetItemRequestDto> requests = itemRequestRepository.findAllByRequesterId(userId,
                             Sort.by(Sort.Direction.ASC, "created"))
@@ -71,7 +71,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                     .collect(Collectors.toList());
             List<ItemDto> items = itemRepository.findAllByRequesterIdIsNot(userId)
                     .stream()
-                    .map(ItemMapper::mapToItemDto)
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
 
             for (GetItemRequestDto request : requests) {
@@ -94,7 +94,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                     itemRequestRepository.findById(requestId).get());
             List<ItemDto> items = itemRepository.findAllByRequestId(requestId)
                     .stream()
-                    .map(ItemMapper::mapToItemDto)
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
             requestDto.setItems(items);
 

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item.model.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemDtoComments {
+public class GetItemDto {
     long id;
 
     @NotNull
@@ -32,12 +32,13 @@ public class ItemDtoComments {
 
     List<Comment> comments;
 
-    public ItemDtoComments(long id, String name, String description, Boolean available) {
+    public GetItemDto(long id, String name, String description, Boolean available) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
     }
+
 
 }
 

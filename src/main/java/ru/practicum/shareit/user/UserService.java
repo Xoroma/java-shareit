@@ -1,12 +1,11 @@
-package ru.practicum.shareit.user.service;
+package ru.practicum.shareit.user;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-
 
 import java.util.List;
 
@@ -17,13 +16,13 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User add(User user) {
+    public User add(User user) throws BadRequestException {
         log.info("Добавлен новый пользователь");
 
         return userRepository.save(user);
     }
 
-    public User getUserById(long id) {
+    public User getUserById(long id) throws NotFoundException {
 
         if (userRepository.findById(id).isPresent()) {
             log.info("Получен пользователь с id " + id);
@@ -37,7 +36,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User update(User user, long id) {
+    public User update(User user, long id) throws NotFoundException {
         user.setId(id);
         if (user.getName() == null) {
             if (userRepository.findById(id).isPresent()) {
@@ -60,10 +59,5 @@ public class UserService {
     public void delete(long id) {
         log.info("Удалён пользователь с id " + id);
         userRepository.deleteById(id);
-    }
-
-    public boolean existsById(Long id) {
-
-        return userRepository.existsById(id);
     }
 }

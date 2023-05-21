@@ -7,6 +7,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+/**
+ * TODO Sprint add-item-requests.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

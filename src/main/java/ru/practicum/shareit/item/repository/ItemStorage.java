@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.user.User;
 
 import java.util.List;

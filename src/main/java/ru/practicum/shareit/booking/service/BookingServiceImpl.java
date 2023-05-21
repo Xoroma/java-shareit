@@ -1,12 +1,12 @@
 package ru.practicum.shareit.booking.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.FullBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.enums.BookingState;
@@ -23,9 +23,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
-
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
@@ -40,7 +39,7 @@ public class BookingServiceImpl implements BookingService {
         if (itemRepository.findById(dto.getItemId()).get().isAvailable()
                 && dto.getEnd().isAfter(dto.getStart())) {
             return BookingMapper.toFullBookingFromBooking(
-                    bookingRepository.save(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)),
+                    bookingRepository.save(BookingMapper.toBooking(dto, bookerId, Status.WAITING)),
                     Status.WAITING, itemRepository, userRepository);
         } else {
             throw new BadRequestException();
@@ -55,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
         }
         if (bookingRepository.findById(bookingId).isPresent()) {
             long bookerId = bookingRepository.findById(bookingId).get().getBookerId();
-            BookingDto dto = BookingMapper.mapToBookingDto(bookingRepository.findById(bookingId).get());
+            BookingDto dto = BookingMapper.toBookingDto(bookingRepository.findById(bookingId).get());
             dto.setId(bookingId);
             Booking booking;
             Status status;
@@ -67,7 +66,7 @@ public class BookingServiceImpl implements BookingService {
             } else {
                 status = Status.REJECTED;
             }
-            booking = BookingMapper.mapToBooking(dto, bookerId, status);
+            booking = BookingMapper.toBooking(dto, bookerId, status);
 
             return BookingMapper.toFullBookingFromBooking(bookingRepository.save(booking), status,
                     itemRepository, userRepository);
@@ -96,9 +95,6 @@ public class BookingServiceImpl implements BookingService {
     public List<FullBookingDto> getAllBookingsByBookerId(long bookerId, BookingState state, Integer from, Integer size) {
         if (userRepository.findById(bookerId).isEmpty()) {
             throw new NotFoundException();
-        }
-        if (from < 0) {
-            throw new BadRequestException();
         }
         PageRequest pageRequest = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "start"));
         switch (state) {
@@ -156,9 +152,6 @@ public class BookingServiceImpl implements BookingService {
     public List<FullBookingDto> getAllBookingByItemsByOwnerId(long ownerId, BookingState state, Integer from, Integer size) {
         if (userRepository.findById(ownerId).isEmpty()) {
             throw new NotFoundException();
-        }
-        if (from < 0) {
-            throw new BadRequestException();
         }
         PageRequest pageRequest = PageRequest.of((from / size), size, Sort.by(Sort.Direction.DESC, "start"));
         switch (state) {

@@ -6,17 +6,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.enums.BookingState;
 import ru.practicum.shareit.booking.model.enums.Status;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -35,7 +35,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BookingServiceTest {
-
     @Mock
     private BookingRepository bookingRepository;
     @Mock
@@ -46,17 +45,15 @@ public class BookingServiceTest {
     BookingServiceImpl bookingService;
 
     @Test
-    void createTest() throws NotFoundException {
-
+    void addBooking() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 2L;
         long bookerId = 1L;
 
         BookingDto dto = new BookingDto(1, itemId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
-        User newUser = new User(1, "testovich", "testovich@test.com");
-        ItemDto itemDto = new ItemDto(itemId, "ItemTestovich", "testDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-
+        User newUser = new User(1, "testovich", "test@test.com");
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
         when(userRepository.findById(anyLong()))
@@ -67,7 +64,6 @@ public class BookingServiceTest {
 
     @Test
     void testAddBookingItemUnavailable() {
-
         BookingDto dto = new BookingDto();
         dto.setItemId(1L);
         dto.setStart(LocalDateTime.now());
@@ -76,21 +72,19 @@ public class BookingServiceTest {
 
         Item item = new Item();
         item.setId(1L);
-        item.setName("Item1");
+        item.setName("Item 1");
         item.setAvailable(false);
-        item.setDescription("Descr");
+        item.setDescription("A description");
         item.setOwnerId(bookerId);
         itemRepository.save(item);
 
         assertThrows(NotFoundException.class, () -> {
             bookingService.addBooking(dto, bookerId);
         });
-
     }
 
     @Test
     void addBooking_whenItemIsNotAvailable() {
-
         BookingDto dto = new BookingDto();
         dto.setItemId(1L);
         dto.setStart(LocalDateTime.now().plusDays(1));
@@ -98,7 +92,6 @@ public class BookingServiceTest {
 
         User owner = new User();
         owner.setId(1L);
-
         Item item = new Item();
         item.setId(1L);
         item.setOwnerId(owner.getId());
@@ -115,7 +108,6 @@ public class BookingServiceTest {
 
     @Test
     void addBooking_whenEndDateIsBeforeStartDate() {
-
         BookingDto dto = new BookingDto();
         dto.setItemId(1L);
         dto.setStart(LocalDateTime.now().plusDays(1));
@@ -140,7 +132,6 @@ public class BookingServiceTest {
 
     @Test
     void addBooking_whenBookerIdIsInvalid() {
-
         BookingDto dto = new BookingDto();
         dto.setItemId(1L);
         dto.setStart(LocalDateTime.now().plusDays(1));
@@ -174,43 +165,39 @@ public class BookingServiceTest {
 
         BookingDto dto = new BookingDto(1, itemId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
         ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         when(itemRepository.findById(anyLong()))
                 .thenReturn(Optional.of(item));
         when(bookingRepository.findById(anyLong()))
-                .thenReturn(Optional.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(Optional.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
 
         assertThrows(NullPointerException.class, () -> bookingService.approvingByOwner(1, true, itemId));
     }
 
     @Test
     void getBooking() throws NotFoundException {
-
         long itemId = 1L;
         long bookerId = 1L;
 
         BookingDto dto = new BookingDto(1, itemId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
         when(bookingRepository.findById(anyLong()))
-                .thenReturn(Optional.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(Optional.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
 
         assertThrows(NoSuchElementException.class, () -> bookingService.getBooking(1, bookerId));
     }
 
     @Test
     public void getBookingWithDifferentBookerAndOwnerIds() {
-
         long bookingId = 1L;
         long bookerId = 2L;
         Booking booking = new Booking();
         booking.setId(bookingId);
         booking.setBookerId(3L);
-
         Item item = new Item();
         item.setId(4L);
         item.setOwnerId(5L);
 
         Optional<Booking> optionalBooking = Optional.of(booking);
-
         when(bookingRepository.findById(bookingId)).thenReturn(optionalBooking);
         when(itemRepository.findById(booking.getItemId())).thenReturn(Optional.of(item));
 
@@ -222,7 +209,6 @@ public class BookingServiceTest {
 
     @Test
     void getBookingNotFound() throws NotFoundException {
-
         long bookerId = 1L;
 
         when(bookingRepository.findById(anyLong()))
@@ -233,25 +219,23 @@ public class BookingServiceTest {
 
     @Test
     void getAllBookings() throws NotFoundException {
-
         long itemId = 1L;
         long bookerId = 1L;
 
         BookingDto dto = new BookingDto(1, itemId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
-        User newUser = new User(1, "testovich", "testovich@test.com");
-
+        User newUser = new User(1, "testovich", "test@test.com");
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(newUser));
         when(bookingRepository.findAllByBookerId(anyLong(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.findByBookerIdAndEndAfter(anyLong(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.findByBookerIdAndStartAfter(anyLong(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.findByBookerIdAndEndIsBeforeAndStartIsAfter(anyLong(), any(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
 
         assertThrows(NoSuchElementException.class, () -> bookingService.getAllBookingsByBookerId(1,
                 BookingState.ALL, 0, 10));
@@ -269,7 +253,6 @@ public class BookingServiceTest {
 
     @Test
     void getAllBookingsNotFoundUser() throws NotFoundException {
-
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
@@ -279,25 +262,23 @@ public class BookingServiceTest {
 
     @Test
     void getAllBookingsByItems() throws NotFoundException {
-
         long itemId = 1L;
         long bookerId = 1L;
 
         BookingDto dto = new BookingDto(1, itemId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
-        User newUser = new User(1, "testovich", "testovich@test.com");
-
+        User newUser = new User(1, "testovich", "test@test.com");
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(newUser));
 
 
         when(bookingRepository.bookingsForItem(anyLong(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.bookingsForItemPast(anyLong(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.bookingsForItemFuture(anyLong(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
         when(bookingRepository.bookingsForItemCurrent(anyLong(), any(), any()))
-                .thenReturn(List.of(BookingMapper.mapToBooking(dto, bookerId, Status.WAITING)));
+                .thenReturn(List.of(BookingMapper.toBooking(dto, bookerId, Status.WAITING)));
 
         assertThrows(NoSuchElementException.class, () -> bookingService.getAllBookingByItemsByOwnerId(1,
                 BookingState.ALL, 0, 10));
@@ -315,7 +296,6 @@ public class BookingServiceTest {
 
     @Test
     void getAllBookingsByItemsNotFoundUser() throws NotFoundException {
-
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
 
@@ -334,9 +314,9 @@ public class BookingServiceTest {
 
     @Test
     void bookingMapperTest() {
-        User newUser = new User(1, "test", "test@test.com");
+        User newUser = new User(1, "testovich", "test@test.com");
         ItemDto itemDto = new ItemDto(1, "TestItem", "DescriptionTest", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, 1);
+        Item item = ItemMapper.toItem(itemDto, 1);
         Booking booking = new Booking(1, LocalDateTime.MIN, LocalDateTime.now(), 1, 1, Status.WAITING);
         when(userRepository.findById(anyLong()))
                 .thenReturn(Optional.of(newUser));

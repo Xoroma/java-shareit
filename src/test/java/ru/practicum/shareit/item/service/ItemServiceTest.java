@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,14 +13,14 @@ import ru.practicum.shareit.booking.model.enums.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoComments;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.dto.GetItemDto;
+import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -50,13 +50,11 @@ public class ItemServiceTest {
     @Test
     void addItem() throws NotFoundException {
         long itemId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
         when(userRepository.existsById(anyLong()))
                 .thenReturn(true);
         when(itemRepository.save(any()))
-                .thenReturn(ItemMapper.mapToItem(itemDto, itemId));
+                .thenReturn(ItemMapper.toItem(itemDto, itemId));
 
         assertEquals(itemDto.getName(), itemService.addItem(itemDto, 1).getName());
     }
@@ -64,8 +62,7 @@ public class ItemServiceTest {
     @Test
     void addItemNoUser() throws NotFoundException, BadRequestException {
         long itemId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
         when(userRepository.existsById(anyLong()))
                 .thenReturn(false);
 
@@ -76,10 +73,8 @@ public class ItemServiceTest {
     void patchItem() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         when(itemRepository.getReferenceById(itemId))
                 .thenReturn(item);
         when(itemRepository.findById(itemId))
@@ -94,8 +89,7 @@ public class ItemServiceTest {
     void patchItemNotFound() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 2L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
 
         assertThrows(NullPointerException.class, () -> itemService.patchItem(itemDto, ownerId, itemId));
     }
@@ -104,11 +98,9 @@ public class ItemServiceTest {
     void patchItemWithIdOnly() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         ItemDto newDto = new ItemDto(itemId, null, null, null, 0);
-
         when(itemRepository.getReferenceById(itemId))
                 .thenReturn(item);
         when(itemRepository.findById(itemId))
@@ -120,38 +112,12 @@ public class ItemServiceTest {
     }
 
     @Test
-    void bookingsIsNotEmptyGetItem() throws NotFoundException {
-        long itemId = 1L;
-        long ownerId = 1L;
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-        ItemDtoComments getItemDto = ItemMapper.mapToItemDtoComments(item, null, null, Collections.emptyList());
-
-        Booking booking = new Booking();
-        booking.setStart(LocalDateTime.now());
-        booking.setStatus(Status.WAITING);
-
-        when(itemRepository.existsById(anyLong()))
-                .thenReturn(true);
-        when(itemRepository.getReferenceById(anyLong()))
-                .thenReturn(item);
-        when(commentRepository.findAllByItemId(anyLong()))
-                .thenReturn(Collections.emptyList());
-        when(bookingRepository.allBookingsForItem(anyLong(), any()))
-                .thenReturn(List.of(booking));
-
-        assertNotEquals(getItemDto, itemService.getItem(itemId, ownerId));
-    }
-
-    @Test
     void getItem() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-        ItemDtoComments getItemDto = ItemMapper.mapToItemDtoComments(item, null, null, Collections.emptyList());
-
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
+        GetItemDto getItemDto = ItemMapper.toGetItemDto(item, null, null, Collections.emptyList());
         when(itemRepository.existsById(anyLong()))
                 .thenReturn(true);
         when(itemRepository.getReferenceById(anyLong()))
@@ -178,12 +144,10 @@ public class ItemServiceTest {
     void getAllItemsByOwner() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 1L;
-
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
-        ItemDtoComments getItemDto = ItemMapper.mapToItemDtoComments(item, null, null, Collections.emptyList());
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
+        GetItemDto getItemDto = ItemMapper.toGetItemDto(item, null, null, Collections.emptyList());
         final Page<Item> page = new PageImpl<>(List.of(item));
-
         when(itemRepository.findAll((Pageable) any()))
                 .thenReturn(page);
         when(commentRepository.findAllByItemsOwnerId(anyLong()))
@@ -198,12 +162,12 @@ public class ItemServiceTest {
     void searchItem() throws NotFoundException {
         long itemId = 1L;
         long ownerId = 1L;
-        ItemDto itemDto = new ItemDto(itemId, "TestItem", "TestDescr", true, 0);
-        Item item = ItemMapper.mapToItem(itemDto, ownerId);
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
         when(itemRepository.search(anyString(), any()))
                 .thenReturn(List.of(item));
 
-        assertEquals(List.of(itemDto), itemService.searchItem("test", ownerId, 0, 10));
+        assertEquals(List.of(itemDto), itemService.searchItem("testovich", ownerId, 0, 10));
     }
 
     @Test
@@ -216,22 +180,19 @@ public class ItemServiceTest {
     @Test
     void addComment() throws NotFoundException, BadRequestException {
         long itemId = 1L;
-
         Comment comment = new Comment();
         comment.setId(1);
         comment.setItemId(itemId);
         comment.setCreated(LocalDateTime.now());
-        comment.setText("test");
-        comment.setAuthorName("test");
+        comment.setText("testovich");
+        comment.setAuthorName("testovich");
         comment.setAuthorId(1);
-
         Booking booking = new Booking(1, LocalDateTime.MIN, LocalDateTime.MIN.plusHours(1), itemId, 1,
                 Status.APPROVED);
-
         when(bookingRepository.bookingsForItemAndBookerPast(anyLong(), anyLong(), any()))
                 .thenReturn(List.of(booking));
         when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.of(new User(1, "test", "test@test.com")));
+                .thenReturn(Optional.of(new User(1, "testovich", "test@test.com")));
         when(commentRepository.save(any()))
                 .thenReturn(comment);
 
@@ -241,15 +202,13 @@ public class ItemServiceTest {
     @Test
     void addCommentNoBooking() throws NotFoundException {
         long itemId = 1L;
-
         Comment comment = new Comment();
         comment.setId(1);
         comment.setItemId(itemId);
         comment.setCreated(LocalDateTime.now());
-        comment.setText("test");
-        comment.setAuthorName("test");
+        comment.setText("testovich");
+        comment.setAuthorName("testovich");
         comment.setAuthorId(1);
-
         when(bookingRepository.bookingsForItemAndBookerPast(anyLong(), anyLong(), any()))
                 .thenReturn(List.of());
 

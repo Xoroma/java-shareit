@@ -1,10 +1,10 @@
-package ru.practicum.shareit.item.service;
+package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDtoComments;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.dto.GetItemDto;
+import ru.practicum.shareit.item.model.dto.ItemDto;
 
 import java.util.List;
 
@@ -14,9 +14,9 @@ public interface ItemService {
 
     ItemDto patchItem(ItemDto dto,long ownerId, long itemId) throws NotFoundException;
 
-    ItemDtoComments getItem(long itemId, long ownerId);
+    GetItemDto getItem(long itemId, long ownerId);
 
-    List<ItemDtoComments> getAllItemsByOwner(long ownerId, Integer from, Integer size);
+    List<GetItemDto> getAllItemsByOwner(long ownerId, Integer from, Integer size);
 
     List<ItemDto> searchItem(String text, long ownerId, Integer from, Integer size);
 
