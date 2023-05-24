@@ -21,6 +21,7 @@ import ru.practicum.shareit.item.model.dto.ItemDto;
 import ru.practicum.shareit.item.model.dto.ItemMapper;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -109,6 +110,29 @@ public class ItemServiceTest {
                 .thenReturn(item);
 
         assertEquals(itemDto, itemService.patchItem(newDto, ownerId, itemId));
+    }
+
+    @Test
+    void bookingsIsNotEmptyGetItem() throws NotFoundException {
+        long itemId = 1L;
+        long ownerId = 1L;
+        ItemDto itemDto = new ItemDto(itemId, "TestItem", "DescriptionTest", true, 0);
+        Item item = ItemMapper.toItem(itemDto, ownerId);
+        GetItemDto getItemDto = ItemMapper.toGetItemDto(item, null, null, Collections.emptyList());
+
+        Booking booking = new Booking();
+        booking.setStart(LocalDateTime.now());
+        booking.setStatus(Status.WAITING);
+        when(itemRepository.existsById(anyLong()))
+                .thenReturn(true);
+        when(itemRepository.getReferenceById(anyLong()))
+                .thenReturn(item);
+        when(commentRepository.findAllByItemId(anyLong()))
+                .thenReturn(Collections.emptyList());
+        when(bookingRepository.allBookingsForItem(anyLong(), any()))
+                .thenReturn(List.of(booking));
+
+        assertNotEquals(getItemDto, itemService.getItem(itemId, ownerId));
     }
 
     @Test
