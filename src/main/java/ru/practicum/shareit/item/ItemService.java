@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface ItemService {
 
-    ItemDto addItem(ItemDto dto, long ownerId) throws NotFoundException;
+    ItemDto addItem(ItemDto dto, long ownerId);
 
-    ItemDto patchItem(ItemDto dto,long ownerId, long itemId) throws NotFoundException;
+    ItemDto patchItem(ItemDto dto,long ownerId, long itemId);
 
     GetItemDto getItem(long itemId, long ownerId);
 
@@ -20,5 +20,5 @@ public interface ItemService {
 
     List<ItemDto> searchItem(String text, long ownerId, Integer from, Integer size);
 
-    Comment addComment(Comment dto, long itemId, long authorId) throws BadRequestException;
+    Comment addComment(Comment dto, long itemId, long authorId);
 }

@@ -49,7 +49,7 @@ public class ItemController {
                                                @RequestParam(required = false, defaultValue = "0")
                                                @Min(0) Integer from,
                                                @RequestParam(required = false, defaultValue = "10")
-                                               Integer size) {
+                                               @Min(0) Integer size) {
         log.info("GET /items");
         return itemService.getAllItemsByOwner(ownerId, from, size);
     }
