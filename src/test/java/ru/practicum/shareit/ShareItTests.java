@@ -54,19 +54,20 @@ class ShareItTests {
 	void beforeEach() {
 
 		userService = new UserService(userRepository);
-		itemService = new ItemServiceImpl(itemRepository, userService, bookingService , commentRepository);
+		itemService = new ItemServiceImpl(itemRepository, userService, bookingService, commentRepository);
 		user = new User(1, "testovich", "test@test.com");
 		itemDto = new ItemDto(1, "TestItem", "DescriptionTest", true,0);
 	}
 
 	@Test
-	void getById(){
+	void getById() {
 
 		when(userRepository.findById(anyLong()))
 				.thenReturn(Optional.ofNullable(user));
 		 User actual = userService.getUserById(1);
 
-		Assertions.assertEquals(actual, user );
+		Assertions.assertEquals(actual, user);
+
 	}
 
 
