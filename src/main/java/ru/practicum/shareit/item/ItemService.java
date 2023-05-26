@@ -1,7 +1,5 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.dto.GetItemDto;
 import ru.practicum.shareit.item.model.dto.ItemDto;

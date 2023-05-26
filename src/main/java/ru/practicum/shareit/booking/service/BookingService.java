@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.FullBookingDto;
 import ru.practicum.shareit.booking.model.enums.BookingState;
-import ru.practicum.shareit.exception.BadRequestException;
 
 import java.util.List;
 
