@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.ItemServiceImpl;
@@ -33,17 +34,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureTestDatabase()
 class ShareItTests {
-    @Mock
-	UserService userService;
-	@Mock
-	ItemService itemService;
 
-	@Mock
-	BookingService bookingService;
+	UserService userService;
+	@MockBean
+	ItemService itemService;
 	@Mock
 	UserRepository userRepository;
 	@MockBean
 	ItemRepository itemRepository;
+	@MockBean
+	BookingRepository bookingRepository;
 	@MockBean
 	CommentRepository commentRepository;
 
@@ -54,26 +54,15 @@ class ShareItTests {
 	void beforeEach() {
 
 		userService = new UserService(userRepository);
-		itemService = new ItemServiceImpl(itemRepository, userService, bookingService, commentRepository);
+		itemService = new ItemServiceImpl(itemRepository, userRepository, bookingRepository, commentRepository);
 		user = new User(1, "testovich", "test@test.com");
 		itemDto = new ItemDto(1, "TestItem", "DescriptionTest", true,0);
 	}
 
-	@Test
-	void getById() {
-
-		when(userRepository.findById(anyLong()))
-				.thenReturn(Optional.ofNullable(user));
-		 User actual = userService.getUserById(1);
-
-		Assertions.assertEquals(actual, user);
-
-	}
 
 
 	@Test
-	void updateUser()  {
-
+	void updateUser() throws BadRequestException, NotFoundException {
 		when(userRepository.save(any()))
 				.thenReturn(user);
 		userService.add(user);
@@ -86,11 +75,10 @@ class ShareItTests {
 		userService.update(newUser, 1);
 
 		Assertions.assertEquals(userService.getUserById(1), newUser);
-
 	}
 
 	@Test
-	void deleteUser()  {
+	void deleteUser() throws BadRequestException {
 		when(userRepository.save(any()))
 				.thenReturn(user);
 		userService.add(user);

@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -15,7 +16,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User add(User user)  {
+    public User add(User user) {
         log.info("Добавлен новый пользователь");
 
         return userRepository.save(user);
@@ -58,10 +59,5 @@ public class UserService {
     public void delete(long id) {
         log.info("Удалён пользователь с id " + id);
         userRepository.deleteById(id);
-    }
-
-    public boolean existsById(Long id) {
-
-        return userRepository.existsById(id);
     }
 }

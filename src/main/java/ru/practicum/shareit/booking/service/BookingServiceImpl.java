@@ -31,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
 
     @Override
-    public FullBookingDto addBooking(BookingDto dto, long bookerId)  {
+    public FullBookingDto addBooking(BookingDto dto, long bookerId) {
         if ((itemRepository.findById(dto.getItemId()).isEmpty() || userRepository.findById(bookerId).isEmpty())
                 || itemRepository.findById(dto.getItemId()).get().getOwnerId() == bookerId) {
             throw new NotFoundException();
@@ -47,7 +47,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public FullBookingDto approvingByOwner(long bookingId, boolean approved, long itemOwnerId)  {
+    public FullBookingDto approvingByOwner(long bookingId, boolean approved, long itemOwnerId) {
         if (itemRepository.findById(bookingRepository.findById(bookingId).get()
                 .getItemId()).get().getOwnerId() != itemOwnerId) {
             throw new NotFoundException();
@@ -204,21 +204,4 @@ public class BookingServiceImpl implements BookingService {
         }
         return null;
     }
-
-    @Override
-    public List<Booking> allBookingsForItem(Long itemId, Sort sort) {
-
-        return bookingRepository.allBookingsForItem(itemId, sort);
-    }
-
-    @Override
-    public List<Booking> findAllByItemsOwnerId(Long ownerId) {
-        return bookingRepository.findAllByItemsOwnerId(ownerId);
-    }
-
-    @Override
-    public List<Booking> bookingsForItemAndBookerPast(Long bookerId, Long itemId, LocalDateTime now) {
-        return bookingRepository.bookingsForItemAndBookerPast(bookerId,itemId,now);
-    }
-
 }
