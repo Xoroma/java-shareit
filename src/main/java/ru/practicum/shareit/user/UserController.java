@@ -3,8 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -21,13 +19,13 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public User add(@Valid @RequestBody User user) throws BadRequestException {
+    public User add(@Valid @RequestBody User user) {
         log.info("POST /users");
         return userService.add(user);
     }
 
     @GetMapping(value = "/{id}")
-    public User getUserById(@PathVariable long id) throws NotFoundException {
+    public User getUserById(@PathVariable long id) {
         log.info(String.format("GET /users/%s", id));
         return userService.getUserById(id);
     }

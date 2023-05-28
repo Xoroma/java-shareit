@@ -3,8 +3,6 @@ package ru.practicum.shareit.item;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.dto.GetItemDto;
 import ru.practicum.shareit.item.model.dto.ItemDto;
@@ -26,14 +24,14 @@ public class ItemController {
     private final String userHeader = "X-Sharer-User-Id";
 
     @PostMapping
-    public ItemDto addItem(@RequestBody @Valid ItemDto dto, @RequestHeader(userHeader) long ownerId) throws NotFoundException {
+    public ItemDto addItem(@RequestBody @Valid ItemDto dto, @RequestHeader(userHeader) long ownerId) {
         log.info("POST /items");
         return itemService.addItem(dto,ownerId);
     }
 
     @PatchMapping(value = "/{itemId}")
     public ItemDto patchItem(@RequestBody ItemDto dto, @PathVariable long itemId,
-                             @RequestHeader(userHeader) long ownerId) throws NotFoundException {
+                             @RequestHeader(userHeader) long ownerId)  {
         log.info(String.format("PATCH /items/%s", itemId));
         return itemService.patchItem(dto,ownerId,itemId);
     }
@@ -66,8 +64,7 @@ public class ItemController {
 
     @PostMapping("{itemId}/comment")
     public Comment addComment(@RequestBody @Valid Comment dto, @PathVariable long itemId,
-                              @RequestHeader(userHeader) long authorId)
-            throws NotFoundException, BadRequestException {
+                              @RequestHeader(userHeader) long authorId) {
         log.info("POST /items/" + itemId + "/comment");
         return itemService.addComment(dto, itemId, authorId);
     }

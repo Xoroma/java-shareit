@@ -8,8 +8,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.FullBookingDto;
 import ru.practicum.shareit.booking.model.enums.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -30,23 +28,20 @@ public class BookingController {
 
     @PostMapping
     public FullBookingDto addBooking(@Valid @RequestBody BookingDto dto,
-                                     @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException, BadRequestException {
+                                     @RequestHeader(userHeader) long bookerId) {
         log.info("POST /bookings");
         return bookingService.addBooking(dto, bookerId);
     }
 
     @PatchMapping("/{bookingId}")
     public FullBookingDto approvingByOwner(@PathVariable long bookingId, @RequestParam boolean approved,
-                                           @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException, BadRequestException {
+                                           @RequestHeader(userHeader) long bookerId) {
         log.info("PATCH /bookings/" + bookingId + "?approved=" + approved);
         return bookingService.approvingByOwner(bookingId, approved, bookerId);
     }
 
     @GetMapping("/{bookingId}")
-    public FullBookingDto getBooking(@PathVariable long bookingId, @RequestHeader(userHeader) long bookerId)
-            throws NotFoundException {
+    public FullBookingDto getBooking(@PathVariable long bookingId, @RequestHeader(userHeader) long bookerId) {
         log.info("GET /bookings/" + bookingId);
         return bookingService.getBooking(bookingId, bookerId);
     }
