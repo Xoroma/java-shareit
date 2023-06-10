@@ -8,9 +8,7 @@ import ru.practicum.shareit.booking.dto.ShortBookingDto;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemDto {
@@ -21,7 +19,6 @@ public class ItemDto {
 
     String description;
 
-    @NotNull
     Boolean available;
 
     ShortBookingDto lastBooking;

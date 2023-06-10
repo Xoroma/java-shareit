@@ -21,6 +21,7 @@ public class ItemDto {
     @NotNull
     String description;
 
+    @NotNull
     Boolean available;
 
     Long requestId;

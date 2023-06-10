@@ -18,9 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @Data
 @Entity
 @AllArgsConstructor

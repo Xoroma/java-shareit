@@ -15,18 +15,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
-    }
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUncompletedBookingException(final UncompletedBookingException e) {
@@ -51,11 +39,6 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
-        return new ErrorResponse("There is no header.");
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
