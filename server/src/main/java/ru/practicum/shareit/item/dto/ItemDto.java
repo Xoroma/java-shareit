@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.dto.ShortBookingDto;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 
