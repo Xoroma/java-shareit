@@ -11,6 +11,7 @@
 
 	<groupId>ru.practicum</groupId>
 	<artifactId>shareit</artifactId>
+	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>ShareIt</name>
@@ -18,6 +19,21 @@
 	<properties>
 		<java.version>11</java.version>
 	</properties>
+
+	<modules>
+		<module>gateway</module>
+		<module>server</module>
+	</modules>
+
+<!--	<dependencyManagement>-->
+<!--		<dependencies>-->
+<!--			<dependency>-->
+<!--				<groupId>org.apache.commons</groupId>-->
+<!--				<artifactId>commons-lang3</artifactId>-->
+<!--				<version>3.12.0</version>-->
+<!--			</dependency>-->
+<!--		</dependencies>-->
+<!--	</dependencyManagement>-->
 
 	<dependencies>
 		<dependency>
@@ -76,6 +92,7 @@
 		</dependency>
 
 	</dependencies>
+
 
 	<build>
 		<resources>
